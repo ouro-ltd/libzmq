@@ -602,7 +602,8 @@ if(MSVC)
     PUBLIC_HEADER "${public_headers}"
     RELEASE_POSTFIX "-${CMAKE_VS_PLATFORM_TOOLSET}-mt-s-${ZMQ_VERSION_MAJOR}_${ZMQ_VERSION_MINOR}_${ZMQ_VERSION_PATCH}"
     DEBUG_POSTFIX "-${CMAKE_VS_PLATFORM_TOOLSET}-mt-sgd-${ZMQ_VERSION_MAJOR}_${ZMQ_VERSION_MINOR}_${ZMQ_VERSION_PATCH}"
-    COMPILE_FLAGS "/D ZMQ_STATIC"
+    COMPILE_DEFINITIONS "ZMQ_STATIC"
+    INTERFACE_COMPILE_DEFINITIONS "ZMQ_STATIC"
     OUTPUT_NAME "libzmq-static")
 else()
     add_library(libzmq SHARED ${sources} ${public_headers} ${html-docs} ${readme-docs} ${zmq-pkgconfig})
@@ -641,8 +642,10 @@ if(SODIUM_FOUND)
 endif()
 if(HAVE_WS2_32)
   target_link_libraries(libzmq ws2_32)
+  target_link_libraries(libzmq-static ws2_32)
 elseif(HAVE_WS2)
   target_link_libraries(libzmq ws2)
+  target_link_libraries(libzmq-static ws2)
 endif()
 
 if(HAVE_RPCRT4)
