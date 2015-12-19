@@ -712,11 +712,6 @@ bool zmq::stream_engine_t::handshake ()
         }
         next_msg = &stream_engine_t::next_handshake_command;
         process_msg = &stream_engine_t::process_handshake_command;
-
-        if(options.heartbeat_interval > 0) {
-            add_timer(options.heartbeat_interval, heartbeat_ivl_timer_id);
-            has_heartbeat_timer = true;
-        }
     }
 
     // Start polling for output if necessary.
@@ -824,6 +819,11 @@ void zmq::stream_engine_t::zap_msg_available ()
 
 void zmq::stream_engine_t::mechanism_ready ()
 {
+    if (options.heartbeat_interval > 0) {
+        add_timer(options.heartbeat_interval, heartbeat_ivl_timer_id);
+        has_heartbeat_timer = true;
+    }
+
     if (options.recv_identity) {
         msg_t identity;
         mechanism->peer_identity (&identity);
@@ -869,7 +869,7 @@ int zmq::stream_engine_t::push_msg_to_session (msg_t *msg_)
 }
 
 int zmq::stream_engine_t::push_raw_msg_to_session (msg_t *msg_) {
-    if (metadata)
+    if (metadata && metadata != msg_->metadata())
         msg_->set_metadata(metadata);
     return push_msg_to_session(msg_);
 }

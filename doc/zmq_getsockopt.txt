@@ -410,6 +410,21 @@ Default value:: 1
 Applicable socket types:: all, when using multicast transports
 
 
+ZMQ_MULTICAST_MAXTPDU: Maximum transport data unit size for multicast packets
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The 'ZMQ_MULTICAST_MAXTPDU' option shall retrieve the maximum transport
+data unit size used for outbound multicast packets.
+
+This must be set at or below the minimum Maximum Transmission Unit (MTU) for
+all network paths over which multicast reception is required.
+
+[horizontal]
+Option value type:: int
+Option value unit:: bytes
+Default value:: 1500
+Applicable socket types:: all, when using multicast transports
+
+
 ZMQ_PLAIN_PASSWORD: Retrieve current password
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The 'ZMQ_PLAIN_PASSWORD' option shall retrieve the last password set for
@@ -738,31 +753,77 @@ Applicable socket types:: all, when using TCP transport
 
 ZMQ_TCP_RECV_BUFFER: Size of the TCP receive buffer
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-The 'ZMQ_RECV_BUFFER' specifies the maximum number of bytes which can
-be received by an individual syscall to receive data from the TCP
-socket. The buffer size is specified as an integer number from 0 (very small)
-to 10 (very large). The default value is 3.
+The 'ZMQ_TCP_RECV_BUFFER' specifies the maximum number of bytes which can
+be received by an individual syscall to receive data from the TCP socket.
+The default value is 8192.
 
 
 [horizontal]
 Option value type:: int
-Option value unit:: N/A
-Default value:: 3
+Option value unit:: >0
+Default value:: 8192
 Applicable socket types:: all, when using TCP transport
 
 ZMQ_TCP_SEND_BUFFER: Size of the TCP receive buffer
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-The 'ZMQ_SEND_BUFFER' specifies the maximum number of bytes which can
-be sent by an individual syscall to transmit data to the TCP
-socket. The buffer size is specified as an integer number from 0 (very small)
-to 10 (very large). The default value is 3.
+The 'ZMQ_TCP_SEND_BUFFER' specifies the maximum number of bytes which can
+be sent by an individual syscall to transmit data to the TCP socket.
+The default value is 8192.
 
 
 [horizontal]
 Option value type:: int
-Option value unit:: N/A
-Default value:: 3
+Option value unit:: >0
+Default value:: 8192
 Applicable socket types:: all, when using TCP transport
+
+ZMQ_VMCI_BUFFER_SIZE: Retrieve buffer size of the VMCI socket
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The `ZMQ_VMCI_BUFFER_SIZE` option shall retrieve the size of the underlying
+buffer for the socket. Used during negotiation before the connection is established.
+
+[horizontal]
+Option value type:: uint64_t
+Option value unit:: bytes
+Default value:: 65546
+Applicable socket types:: all, when using VMCI transport
+
+
+ZMQ_VMCI_BUFFER_MIN_SIZE: Retrieve min buffer size of the VMCI socket
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The `ZMQ_VMCI_BUFFER_MIN_SIZE` option shall retrieve the min size of the underlying
+buffer for the socket. Used during negotiation before the connection is established.
+
+[horizontal]
+Option value type:: uint64_t
+Option value unit:: bytes
+Default value:: 128
+Applicable socket types:: all, when using VMCI transport
+
+
+ZMQ_VMCI_BUFFER_MAX_SIZE: Retrieve max buffer size of the VMCI socket
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The `ZMQ_VMCI_BUFFER_MAX_SIZE` option shall retrieve the max size of the underlying
+buffer for the socket. Used during negotiation before the connection is established.
+
+[horizontal]
+Option value type:: uint64_t
+Option value unit:: bytes
+Default value:: 262144
+Applicable socket types:: all, when using VMCI transport
+
+
+ZMQ_VMCI_CONNECT_TIMEOUT: Retrieve connection timeout of the VMCI socket
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The `ZMQ_VMCI_CONNECT_TIMEOUT` option shall retrieve connection timeout
+for the socket.
+
+[horizontal]
+Option value type:: int
+Option value unit:: milliseconds
+Default value:: -1
+Applicable socket types:: all, when using VMCI transport
+
 
 RETURN VALUE
 ------------

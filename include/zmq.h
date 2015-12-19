@@ -325,6 +325,11 @@ ZMQ_EXPORT uint32_t zmq_msg_routing_id (zmq_msg_t *msg);
 #define ZMQ_THREAD_SAFE 81
 #define ZMQ_TCP_RECV_BUFFER 82
 #define ZMQ_TCP_SEND_BUFFER 83
+#define ZMQ_MULTICAST_MAXTPDU 84
+#define ZMQ_VMCI_BUFFER_SIZE 85
+#define ZMQ_VMCI_BUFFER_MIN_SIZE 86
+#define ZMQ_VMCI_BUFFER_MAX_SIZE 87
+#define ZMQ_VMCI_CONNECT_TIMEOUT 88
 
 /*  Message options                                                           */
 #define ZMQ_MORE 1
@@ -447,6 +452,21 @@ ZMQ_EXPORT int zmq_poller_remove_fd (void *poller, int fd);
 #endif
 
 /******************************************************************************/
+/*  Scheduling timers                                                         */
+/******************************************************************************/
+
+typedef void (zmq_timer_fn)(int timer_id, void *arg);
+
+ZMQ_EXPORT void *zmq_timers_new ();
+ZMQ_EXPORT int   zmq_timers_close (void *timers);
+ZMQ_EXPORT int   zmq_timers_add (void *timers, size_t interval, zmq_timer_fn handler, void *arg);
+ZMQ_EXPORT int   zmq_timers_cancel (void *timers, int timer_id);
+ZMQ_EXPORT int   zmq_timers_set_interval (void *timers, int timer_id, size_t interval);
+ZMQ_EXPORT int   zmq_timers_reset (void *timers, int timer_id);
+ZMQ_EXPORT long  zmq_timers_timeout (void *timers);
+ZMQ_EXPORT int   zmq_timers_execute (void *timers);
+
+/******************************************************************************/
 /*  Message proxying                                                          */
 /******************************************************************************/
 
@@ -537,4 +557,3 @@ ZMQ_EXPORT void zmq_threadclose (void* thread);
 #endif
 
 #endif
-

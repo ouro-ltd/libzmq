@@ -6,6 +6,7 @@ project(ZeroMQ)
 list(INSERT CMAKE_MODULE_PATH 0 "${CMAKE_SOURCE_DIR}")
 
 option(WITH_OPENPGM "Build with support for OpenPGM" OFF)
+option(WITH_VMCI "Build with support for VMware VMCI socket" OFF)
 
 if(APPLE)
   option(ZMQ_BUILD_FRAMEWORK "Build as OS X framework" ON)
@@ -179,6 +180,12 @@ endmacro()
 
 if(MSVC)
   zmq_check_cxx_flag_prepend("/W3")
+
+  if(MSVC_IDE)
+    set(MSVC_TOOLSET "-${CMAKE_VS_PLATFORM_TOOLSET}")
+  else()
+    set(MSVC_TOOLSET "")
+  endif()
 else()
   zmq_check_cxx_flag_prepend("-Wall")
 endif()
@@ -302,8 +309,8 @@ if(MSVC)
     set(OPENPGM_INCLUDE_DIRS ${OPENPGM_ROOT}/include)
     set(OPENPGM_LIBRARY_DIRS ${OPENPGM_ROOT}/lib)
     set(OPENPGM_LIBRARIES
-      optimized libpgm-${CMAKE_VS_PLATFORM_TOOLSET}-mt-${OPENPGM_VERSION_MAJOR}_${OPENPGM_VERSION_MINOR}_${OPENPGM_VERSION_MICRO}.lib
-      debug libpgm-${CMAKE_VS_PLATFORM_TOOLSET}-mt-gd-${OPENPGM_VERSION_MAJOR}_${OPENPGM_VERSION_MINOR}_${OPENPGM_VERSION_MICRO}.lib)
+      optimized libpgm${MSVC_TOOLSET}-mt-${OPENPGM_VERSION_MAJOR}_${OPENPGM_VERSION_MINOR}_${OPENPGM_VERSION_MICRO}.lib
+      debug libpgm${MSVC_TOOLSET}-mt-gd-${OPENPGM_VERSION_MAJOR}_${OPENPGM_VERSION_MINOR}_${OPENPGM_VERSION_MICRO}.lib)
   endif()
 else()
   if(WITH_OPENPGM)
@@ -448,6 +455,7 @@ set(cxx-sources
         zmq_utils.cpp
         decoder_allocators.cpp
         socket_poller.cpp
+        timers.cpp
         config.hpp)
 
 set(rc-sources version.rc)
@@ -501,6 +509,12 @@ if(WITH_OPENPGM)
   link_directories(${OPENPGM_LIBRARY_DIRS})
   set(OPTIONAL_LIBRARIES ${OPENPGM_LIBRARIES})
 endif(WITH_OPENPGM)
+
+if(WITH_VMCI)
+    add_definitions(-DZMQ_HAVE_VMCI)
+    include_directories(${VMCI_INCLUDE_DIRS})
+    list(APPEND cxx-sources vmci_address.cpp vmci_connecter.cpp vmci_listener.cpp vmci.cpp)
+endif(WITH_VMCI)
 
 #-----------------------------------------------------------------------------
 # source generators
@@ -593,17 +607,16 @@ if(MSVC)
   target_link_libraries(libzmq ${OPTIONAL_LIBRARIES})
   set_target_properties(libzmq PROPERTIES
     PUBLIC_HEADER "${public_headers}"
-    RELEASE_POSTFIX "-${CMAKE_VS_PLATFORM_TOOLSET}-mt-${ZMQ_VERSION_MAJOR}_${ZMQ_VERSION_MINOR}_${ZMQ_VERSION_PATCH}"
-    DEBUG_POSTFIX "-${CMAKE_VS_PLATFORM_TOOLSET}-mt-gd-${ZMQ_VERSION_MAJOR}_${ZMQ_VERSION_MINOR}_${ZMQ_VERSION_PATCH}"
+    RELEASE_POSTFIX "${MSVC_TOOLSET}-mt-${ZMQ_VERSION_MAJOR}_${ZMQ_VERSION_MINOR}_${ZMQ_VERSION_PATCH}"
+    DEBUG_POSTFIX "${MSVC_TOOLSET}-mt-gd-${ZMQ_VERSION_MAJOR}_${ZMQ_VERSION_MINOR}_${ZMQ_VERSION_PATCH}"
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin"
     COMPILE_DEFINITIONS "DLL_EXPORT")
   add_library(libzmq-static STATIC ${sources})
   set_target_properties(libzmq-static PROPERTIES
     PUBLIC_HEADER "${public_headers}"
-    RELEASE_POSTFIX "-${CMAKE_VS_PLATFORM_TOOLSET}-mt-s-${ZMQ_VERSION_MAJOR}_${ZMQ_VERSION_MINOR}_${ZMQ_VERSION_PATCH}"
-    DEBUG_POSTFIX "-${CMAKE_VS_PLATFORM_TOOLSET}-mt-sgd-${ZMQ_VERSION_MAJOR}_${ZMQ_VERSION_MINOR}_${ZMQ_VERSION_PATCH}"
-    COMPILE_DEFINITIONS "ZMQ_STATIC"
-    INTERFACE_COMPILE_DEFINITIONS "ZMQ_STATIC"
+    RELEASE_POSTFIX "${MSVC_TOOLSET}-mt-s-${ZMQ_VERSION_MAJOR}_${ZMQ_VERSION_MINOR}_${ZMQ_VERSION_PATCH}"
+    DEBUG_POSTFIX "${MSVC_TOOLSET}-mt-sgd-${ZMQ_VERSION_MAJOR}_${ZMQ_VERSION_MINOR}_${ZMQ_VERSION_PATCH}"
+    COMPILE_FLAGS "/D ZMQ_STATIC"
     OUTPUT_NAME "libzmq-static")
 else()
     add_library(libzmq SHARED ${sources} ${public_headers} ${html-docs} ${readme-docs} ${zmq-pkgconfig})
@@ -724,8 +737,10 @@ if(MSVC)
             ARCHIVE DESTINATION lib
             PUBLIC_HEADER DESTINATION include
             COMPONENT SDK)
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/bin/libzmq-${CMAKE_VS_PLATFORM_TOOLSET}-mt-gd-${ZMQ_VERSION_MAJOR}_${ZMQ_VERSION_MINOR}_${ZMQ_VERSION_PATCH}.pdb DESTINATION lib
+    if(NOT CMAKE_PDB_OUTPUT_DIRECTORY)
+      install(FILES ${CMAKE_CURRENT_BINARY_DIR}/bin/libzmq${MSVC_TOOLSET}-mt-gd-${ZMQ_VERSION_MAJOR}_${ZMQ_VERSION_MINOR}_${ZMQ_VERSION_PATCH}.pdb DESTINATION lib
             COMPONENT SDK)
+    endif()
   else()
     install(TARGETS libzmq
             RUNTIME DESTINATION bin

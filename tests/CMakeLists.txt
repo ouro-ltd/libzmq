@@ -50,6 +50,7 @@ set(tests
         test_pub_invert_matching
         test_thread_safe
         test_client_server
+        test_setsockopt
         test_sockopt_hwm
         test_heartbeats
         test_poller
@@ -68,6 +69,7 @@ set(tests
         test_sub_forward_tipc
         test_xpub_manual
         test_xpub_welcome_msg
+        test_timers
 )
 if(NOT WIN32)
   list(APPEND tests
@@ -89,6 +91,13 @@ if(NOT WIN32)
   if(HAVE_FORK)
     list(APPEND tests test_fork)
   endif()
+endif()
+
+if(WITH_VMCI)
+  list(APPEND tests
+          test_pair_vmci
+          test_reqrep_vmci
+  )
 endif()
 
 foreach(test ${tests})
