@@ -667,6 +667,7 @@ endif()
 
 if(HAVE_IPHLAPI)
   target_link_libraries(libzmq iphlpapi)
+  target_link_libraries(libzmq-static iphlpapi)
 endif()
 
 if(RT_LIBRARY)
